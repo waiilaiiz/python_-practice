@@ -15,12 +15,17 @@ def run_game():
         (ai_settings.screen_width,ai_settings.screen_height)
         )
     ship = Ship(ai_settings, screen)
-    alien = Alien(ai_settings, screen)
     bullets = Group()
-
+    aliens = Group()
+    # 创建外星人
+    gf.create_fleet(ai_settings, screen, ship, aliens)
     while True:
+        # 检测键盘事件
         gf.check_events(ai_settings, screen, ship, bullets)
+        # 更新飞船位置
         ship.update()
-        gf.update_screen(ai_settings, screen, ship, alien,bullets)
-        gf.update_bullets(bullets)
+
+        gf.update_screen(ai_settings, screen, ship, bullets, aliens)
+        gf.update_aliens(ai_settings, aliens)
+        gf.update_bullets(ai_settings, screen, ship, aliens, bullets)
 run_game()
