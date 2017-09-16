@@ -50,10 +50,11 @@ def update_screen(ai_settings, screen, ship, bullets, aliens):
     aliens.draw(screen)
     pygame.display.flip()
 
-def update_aliens(ai_settings, aliens):
-    for alien in aliens:
-        check_fleet_edges(ai_settings, aliens)
-        alien.update()
+def update_aliens(ai_settings, aliens, ship):
+    check_fleet_edges(ai_settings, aliens)
+    aliens.update()
+    if pygame.sprite.spritecollideany(ship, aliens):
+        print("ship hit")
 
 def update_bullets(ai_settings, screen,ship, aliens, bullets):
     bullets.update()
@@ -114,6 +115,5 @@ def check_fleet_edges(ai_settings, aliens):
 
 def change_fleet_direction(ai_settings, aliens):
     for alien in aliens.sprites():
-        if alien.check_edges():
-            alien.rect.y += ai_settings.alien_drop_speed
-            alien.ai_settings.alien_fleet_direct *= -1
+        alien.rect.y += ai_settings.alien_drop_speed
+    ai_settings.alien_fleet_direct *= -1
