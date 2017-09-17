@@ -1,7 +1,7 @@
 import sys
 
 import pygame
-
+from time import sleep
 from bullet import Bullet
 
 from alien import Alien
@@ -50,11 +50,13 @@ def update_screen(ai_settings, screen, ship, bullets, aliens):
     aliens.draw(screen)
     pygame.display.flip()
 
-def update_aliens(ai_settings, aliens, ship):
+def update_aliens(ai_settings, stats, screen, aliens, ship, bullets):
     check_fleet_edges(ai_settings, aliens)
     aliens.update()
     if pygame.sprite.spritecollideany(ship, aliens):
         print("ship hit")
+        ship_hit(ai_settings, stats, screen, aliens, ship, bullets)
+    check_aliens_bottom(aliens, stats, screen, ship, aliens, bullets)
 
 def update_bullets(ai_settings, screen,ship, aliens, bullets):
     bullets.update()
@@ -71,6 +73,26 @@ def fire_bullet(ai_settings, screen, ship, bullets):
     if len(bullets) < ai_settings.bullet_allowed:
         new_bullet = Bullet(ai_settings, screen, ship)
         bullets.add(new_bullet)
+
+def ship_hit(ai_settings, stats, screen, aliens, ship, bullets):
+    '''响应被外星人撞到的飞船'''
+    if stats.ships_left > 0:
+        # 将ships_left减1
+        stats.ships_left -= 1
+
+        # 清空外星人列表和子弹列表
+        aliens.empty()
+        bullets.empty()
+
+        # 创建一群新的外星人，并将飞船放到屏幕底端中央
+        create_fleet(ai_settings, screen, ship, aliens)
+        ship.center_ship()
+        # 暂停
+        sleep(1)
+    else:
+        stats.game_active = False
+
+
 
 def create_fleet(ai_settings, screen, ship, aliens):
     alien = Alien(ai_settings, screen)
@@ -91,7 +113,6 @@ def get_number_aliens_y(ai_settings, ship_height, alien_height):
     return number_alien_y
 
 def create_aline(ai_settings, screen, aliens, alien_number, row_number):
-
     alien = Alien(ai_settings, screen)
 
     alien_width = alien.rect.width
@@ -105,15 +126,27 @@ def create_aline(ai_settings, screen, aliens, alien_number, row_number):
 
     aliens.add(alien)
 
+
 def check_fleet_edges(ai_settings, aliens):
     for alien in aliens.sprites():
         if alien.check_edges():
             change_fleet_direction(ai_settings, aliens)
             break
 
-
-
 def change_fleet_direction(ai_settings, aliens):
     for alien in aliens.sprites():
         alien.rect.y += ai_settings.alien_drop_speed
     ai_settings.alien_fleet_direct *= -1
+
+def check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets):
+    '''检查是否有外星人到达了屏幕底端'''
+    screen_rect = screen.get_rect()
+    for alien in aliens.sprites():
+        if alien.rect.bottom >= screen_rect.bottom:
+            ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+            break
+
+
+
+
+
